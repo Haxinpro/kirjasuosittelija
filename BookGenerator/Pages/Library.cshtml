@@ -1,0 +1,120 @@
+@page
+@using BookGenerator.Models
+@using BookGenerator.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@model BookGenerator.Pages.LibraryModel
+@{
+    ViewData["Title"] = "Library";
+}
+
+@Html.AntiForgeryToken()
+
+@if (!User.Identity?.IsAuthenticated ?? true)
+{
+    <div class="alert alert-warning mt-3" role="alert">
+        🔒 To save and view your personal library, please <a href="/Login">log in</a>.
+    </div>
+}
+else
+{
+    <div class="library-container dark-theme">
+        <h1>Library</h1>
+
+        <a class="btn btn-primary mb-3" href="/">Search and Add More Books</a>
+
+        @if (Model.Books.Count >= 5)
+        {
+            <div id="book-limit-warning" class="alert alert-danger">
+                You have saved 5 books, which is the maximum. Please delete one to add more.
+            </div>
+        }
+
+        <h2>Book List (@Model.Books.Count)</h2>
+
+        @if (Model.IsBookAdded)
+        {
+            <p class="text-success">New book added! Refresh the page to see it.</p>
+        }
+
+        @if (Model.Books.Any())
+        {
+            <div class="book-list">
+                @foreach (var book in Model.Books)
+                {
+                    <div class="book-card" data-book-id="@book.Id">
+                        <div class="book-image-container">
+                            <img src="@book.ThumbnailUrl" alt="@book.Title" />
+                        </div>
+                        <div class="book-details">
+                            <h3>@book.Title</h3>
+                            <p>Author: @book.Author</p>
+                            <p>Year: @book.PublicationYear</p>
+                            @if (!string.IsNullOrEmpty(book.Description))
+                            {
+                                <p><strong>Description:</strong> @book.Description</p>
+                            }
+                            <button class="btn btn-danger delete-book" data-id="@book.Id">Delete</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p>No books available.</p>
+        }
+    </div>
+}
+
+@section Scripts {
+    <script>
+        // Delete-book functionality
+        document.querySelectorAll('.delete-book').forEach(button => {
+            button.addEventListener('click', async (event) => {
+                try {
+                    const bookId = event.target.dataset.id;
+                    if (confirm('Are you sure you want to delete this book?')) {
+                        const response = await fetch('/Library?handler=DeleteBook', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                            },
+                            body: JSON.stringify({ bookId: bookId })
+                        });
+
+                        const result = await response.json();
+                        console.log('Server response:', result);
+
+                        if (result.success) {
+                            const bookCard = document.querySelector(`.book-card[data-book-id='${bookId}']`);
+                            if (bookCard) {
+                                bookCard.remove();
+
+                                const bookCountElement = document.querySelector('h2');
+                                const currentCount = document.querySelectorAll('.book-card').length;
+                                bookCountElement.textContent = `Book List (${currentCount})`;
+
+                                // Remove limit warning if book count is now below 5
+                                if (currentCount < 5) {
+                                    const warning = document.getElementById('book-limit-warning');
+                                    if (warning) warning.remove();
+                                }
+
+                                alert('Book deleted from your library!');
+                            }
+                        } else {
+                            alert('Failed to delete the book: ' + (result.message || 'Unknown error'));
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error deleting book from library');
+                }
+            });
+        });
+    </script>
+}
+
+<script src="~/js/library.js"></script>

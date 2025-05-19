@@ -1,0 +1,55 @@
+﻿@page
+@using BookGenerator.Models
+@using BookGenerator.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@model BookGenerator.Pages.IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="container">
+    <h1>Google API test</h1>
+    <div class="search-box dark-theme">
+        <label for="searchType">Search</label>
+        <select id="searchType" onchange="toggleSearchInput()" class="form-control dark-select">
+            <option value="random">Random</option>
+            <option value="year">Year</option>
+            <option value="author">Author</option>
+            <option value="genre">Genre</option>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <option value="my-authors">My Authors</option>
+            }
+        </select>
+
+        <input type="text" id="searchInput" placeholder="Optional" class="form-control dark-input" />
+        <select id="genreSelect" style="display:none;" class="form-control dark-select">
+            <option value="action">Action</option>
+            <option value="adventure">Adventure</option>
+            <option value="biography">Biography</option>
+            <option value="fiction">Fiction</option>
+            <option value="fantasy">Fantasy</option>
+            <option value="history">History</option>
+            <option value="horror">Horror</option>
+            <option value="mystery">Mystery</option>
+            <option value="romance">Romance</option>
+            <option value="science fiction">Science Fiction</option>
+            <option value="thriller">Thriller</option>
+        </select>
+
+        <button id="searchButton" onclick="searchBook()" class="btn btn-primary">Search</button>
+    </div>
+
+    <div id="results" class="dark-results"></div>
+</div>
+
+@section Scripts {
+    <script src="~/js/index.js"></script>
+}
+
+<script>
+    const isAuthenticated = @User.Identity.IsAuthenticated.ToString().ToLower(); // "true" tai "false"
+</script>

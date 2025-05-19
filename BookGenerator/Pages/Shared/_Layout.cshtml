@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BookGenerator</title>
+
+    @* Käytä erillistä tyylitiedostoa Library-sivulla *@
+    @{
+        var isLibraryPage = Context.Request.Path.Value?.Contains("/Library") ?? false;
+    }
+    @if (isLibraryPage)
+    {
+        <link rel="stylesheet" href="~/css/library.css" asp-append-version="true" />
+    }
+
+    <!-- 🌙 Aseta tumma tila ennen tyylejä -->
+    <script>
+        (function () {
+            try {
+                const theme = localStorage.getItem('theme');
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark-mode');
+                }
+            } catch (e) {
+                console.error('Theme init failed:', e);
+            }
+        })();
+    </script>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/theme-toggle.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/BookGenerator.styles.css" asp-append-version="true" />
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg shadow-sm">
+            <div class="container main-content">
+                <a class="navbar-brand" asp-page="/Index">BookGenerator</a>
+
+                <!-- Hamburger menu -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain"
+                    aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarMain">
+                    <!-- Vasemman reunan linkit -->
+                    <ul class="navbar-nav me-auto align-items-center">
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center gap-1" asp-page="/Index">
+                                🔍 <span>Search</span>
+                            </a>
+                        </li>
+                        <li><a class="dropdown-item" asp-page="/Library">📚 Library</a></li>
+                    </ul>
+
+                    <!-- Oikean reunan linkit -->
+                    <ul class="navbar-nav align-items-center">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#"
+                                    id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <div class="avatar-circle">
+                                        @User.Identity.Name.Substring(0, 1).ToUpper()
+                                    </div>
+                                    <span>Profile</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li class="dropdown-header text-muted ps-3">
+                                        @User.Identity.Name
+                                    </li>
+                                    <li><a class="dropdown-item" asp-page="/ChangePassword">✏️ Change Password</a></li>
+                                    <li><a class="dropdown-item text-danger" asp-page="/DeleteAccount">🗑️ Delete
+                                            Account</a></li>
+                                    <li>
+                                        <form method="post" asp-page="/Logout" class="d-inline">
+                                            <button class="dropdown-item text-start w-100" type="submit">🚪 Logout</button>
+                                        </form>
+                                    </li>
+                                </ul>
+
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center gap-1" asp-page="/Login">
+                                    🔑 <span>Login</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center gap-1" asp-page="/Register">
+                                    📝 <span>Register</span>
+                                </a>
+                            </li>
+                        }
+
+                        <li class="nav-item d-flex align-items-center ms-3">
+                            <label class="theme-switch" title="Toggle Theme">
+                                <input type="checkbox" id="themeToggle" />
+                                <span class="slider"></span>
+                            </label>
+                        </li>
+                        <li class="nav-item position-relative d-flex align-items-center ms-3">
+                            <span class="help-icon" tabindex="0">❓</span>
+                            <div class="help-tooltip">
+                                <strong>Need help?</strong><br />
+                                – Search by author, genre, or year<br />
+                                – Hover over a book image to save<br />
+                                – Login required to save books (5 max)<br />
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted mt-5 py-3">
+        <div class="container text-center">
+            &copy; 2025 - BookGenerator — <a asp-page="/Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+    <partial name="_ValidationScriptsPartial" />
+</body>
+
+</html>

@@ -1,0 +1,15 @@
+@page
+@model BookGenerator.Pages.DeleteAccountModel
+@{
+    ViewData["Title"] = "Delete Account";
+}
+
+<h2>🗑️ Tilin poistaminen</h2>
+
+<p style="color: red;"><strong>Oletko varma, että haluat poistaa tilisi?</strong></p>
+<p>Tämä toiminto on pysyvä, eikä sitä voi peruuttaa.</p>
+
+<form method="post">
+    <button class="btn btn-danger" type="submit">Kyllä, poista tilini</button>
+    <a class="btn btn-secondary" asp-page="/Index">Peruuta</a>
+</form>
